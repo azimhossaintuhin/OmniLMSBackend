@@ -2,18 +2,25 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from rest_framework.generics import RetrieveUpdateAPIView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.parsers import MultiPartParser , FormParser , JSONParser
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView 
 
 # ========= Importing utilities ========== #
 from constant.Response import SuccessResponse, ErrorResponse
-from apps.account.models import Token, User
 from constant.email.ForgotPassword import send_forgot_password_email
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 
+# ========  Databse Import ====== #
+from apps.account.models import Token, User, UserProfile
+
+
 # ========= Importing serializers ========== #
-from .serializers import RegisterSerializer, CustomTokenObtainPairSerializer
+from .serializers import RegisterSerializer, CustomTokenObtainPairSerializer , UserProfileSerializer,CustomTokenRefreshSerializer
+
+from django.core.cache import cache
+from django.utils import timezone
+from datetime import timedelta
 
 # ===== Rigiter Api View ======= #
 class RegisterApiView(APIView):
@@ -67,20 +74,21 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 #  ==== Custom Refresh Token Pair View ======== #
 class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
 
     def post(self, request, *args, **kwargs):
         # Retrieve the refresh token from the cookies
         refresh_token = request.COOKIES.get('refresh')
-           
+        
 
         if not refresh_token:
             return ErrorResponse("Refresh token not found")
 
         # Prepare the data for token refresh
         data = {'refresh': refresh_token}
-
+        print(data)
         # Call the parent class's post method to refresh the tokens
-        response = super().post(request, data, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)
         print( "Custom resposne ",response)
 
         # Handle successful token refresh
@@ -120,6 +128,11 @@ class CustomTokenRefreshView(TokenRefreshView):
 
         return response
 
+    def get_serializer_context(self):
+        """ Pass the request context to the serializer. """
+        context = super().get_serializer_context()
+        context['request'] = self.request  # Add the request to the context
+        return context
 
 # ======= Logout Api View ========= #
 class LogoutApiView(APIView):
@@ -147,23 +160,36 @@ class ForgotPasswordApiView(APIView):
             token_generator = PasswordResetTokenGenerator()
             user_token = token_generator.make_token(user)
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+
+            # Define the cache key for this user
+            cache_key = f"password_reset_cooldown_{user.pk}"
+            cooldown_period = 40  # Cooldown period in seconds
+
+            # Check if the user is in cooldown
+            last_request_time = cache.get(cache_key)
+            current_time = timezone.now()
+
+            if last_request_time:
+                time_diff = (current_time - last_request_time).total_seconds()
+                if time_diff < cooldown_period:
+                    remaining_time = int(cooldown_period - time_diff)
+                    return ErrorResponse(f"Please wait {remaining_time} seconds before requesting again.")
             
-            # Update or create the token
-            token, created = Token.objects.update_or_create(user=user, defaults={"token": user_token})
-            if created:
-                token.save()
+            # If not in cooldown, update the cache with the current time
+            cache.set(cache_key, current_time, timeout=cooldown_period)
+
             reset_link = f"{request.scheme}://{request.get_host()}/api/v1/reset-password/{uidb64}/{user_token}/"
             
             # Send the reset link via email
             send_forgot_password_email(user, reset_link)
 
-            return SuccessResponse("message","Email sent successfully")
+            return SuccessResponse("message", "Email sent successfully")
 
         except User.DoesNotExist:
             return ErrorResponse("User doesn't exist")
         except Exception as e:
             return ErrorResponse(f"An error occurred: {str(e)}")
-         
+        
 
 # ========= Reset Password API View =========== #
 class ResetPasswordApiView(APIView):
@@ -244,5 +270,43 @@ class AuthenticatedApiView(APIView):
         return SuccessResponse("user",user )
 
 
+# ======== User Profile Api View ========== #
+class  UserProfileApiView(APIView):
+    permission_classes= [IsAuthenticated]
 
+
+    # ========== Get Request =========== # 
+    def get(self,request,*args, **kwargs):
+        user =  request.user
+        
+        query =  UserProfile.objects.get(user=user)
+
+        try:
+            qery_data =  UserProfileSerializer(query).data
+            return SuccessResponse("user" , qery_data)
+        except query.DoesNotExist:
+            return ErrorResponse("User Dosen't  Exsits")
+
+    def patch(self, request, *args, **kwargs):
+        print(request.data)  # Use request.data instead of request.body for parsed data
+        user = request.user
+        
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+            serializer = UserProfileSerializer(user_profile, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                print("valid", serializer.validated_data)  # Print validated data instead of serializer.data
+                serializer.save()
+                return SuccessResponse("message", "User Profile Updated Successfully")
+            else:
+                print(serializer.errors)  # Print the errors for debugging
+                return ErrorResponse(serializer.errors)  # Corrected to return serializer.errors instead of error_messages
+
+        except UserProfile.DoesNotExist:
+            return ErrorResponse("Sorry, User Profile Doesn't Exist")
+            
+        
+        
+    
 

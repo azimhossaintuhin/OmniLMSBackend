@@ -1,14 +1,15 @@
 # core/settings/development.py
 
 from .base import *
-import logging
 
-logger = logging.getLogger(__name__)
-logger.debug(f"Template directories: {TEMPLATES[0]['DIRS']}")
 # Development-specific settings
 DEBUG = True  # Set to True for development
 
 ALLOWED_HOSTS = ["*"]
+
+
+
+
 
 # Add any other development-specific settings here
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

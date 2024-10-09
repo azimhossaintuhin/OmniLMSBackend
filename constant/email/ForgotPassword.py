@@ -1,7 +1,7 @@
-# utils.py (or a similar utility file)
 from django.core.mail import send_mail
 from django.conf import settings
-from datetime import datetime  # Correct import for datetime
+from django.template.loader import render_to_string
+from datetime import datetime
 from decouple import config
 import logging
 
@@ -12,9 +12,24 @@ def send_forgot_password_email(user, reset_link):
     try:
         subject = "Reset Your Password"
         
-        # Create a plain text message
+        # Context for the HTML template
+        context = {
+            'username': user.username,
+            'reset_link': reset_link,
+            'year': datetime.now().year
+        }
+        
+        try:
+            # Move template rendering inside the function
+            html_message = render_to_string('forgotpass.html', context)
+        except Exception as template_error:
+            logger.error(f"Template error: {template_error}")
+            # Fallback to plain text email if template fails
+            html_message = None
+        
+        # Create a plain text version for fallback
         plain_message = f"""
-        Hi {user.username},  # You can adjust this based on how you want to address the user.
+        Hi {user.username},  
         
         We received a request to reset your password. Please click the link below to reset it:
         
@@ -27,9 +42,10 @@ def send_forgot_password_email(user, reset_link):
         {datetime.now().year}
         """
         
-        from_email = config("EMAIL_HOST_USER")  # Get the default from email
-        to = user.email  # User's email address
-        logger.debug(f'Sending email to {to}')  # Debug log
+        from_email = config("EMAIL_HOST_USER")
+        to = user.email
+        
+        logger.info(f'Attempting to send password reset email to {to}')
 
         # Send the email
         send_mail(
@@ -37,9 +53,12 @@ def send_forgot_password_email(user, reset_link):
             plain_message,
             from_email,
             [to],
-            fail_silently=False,  # Set to True to ignore errors during sending
+            html_message=html_message,
+            fail_silently=False,
         )
+        logger.info(f'Successfully sent password reset email to {to}')
         return True
+        
     except Exception as e:
-        logger.exception("Exception occurred while sending forgot password email")  # Log the exception
+        logger.exception("Exception occurred while sending forgot password email")
         return False

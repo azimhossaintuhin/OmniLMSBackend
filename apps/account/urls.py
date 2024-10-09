@@ -10,7 +10,10 @@ urlpatterns:list= [
      path("reset-password/<str:uid>/<str:token>/", ResetPasswordApiView.as_view() , name="reset password" ),
     #  for mobile authentication
      path("mobile/token" , mobileLoginApiView.as_view() , name="mobile_login"),
-     path("is_authenticated/" ,AuthenticatedApiView.as_view() , name="is_authenticated"  )
+     path("is_authenticated/" ,AuthenticatedApiView.as_view() , name="is_authenticated"),
+    # User Profile Related 
+    path('user-profile/' , UserProfileApiView.as_view() , name="user_profile" )
+
     
  ]
  

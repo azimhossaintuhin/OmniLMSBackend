@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User , UserProfile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer , TokenRefreshSerializer
 from rest_framework.exceptions import ValidationError
 
@@ -19,7 +19,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
-
+#Register serializer
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
 
@@ -52,13 +52,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user  # Make sure to return the created user
 
 
-
+# custom token refresh  serializer
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+
     refresh = serializers.CharField(required=False)  # Set required=False
 
     def validate(self, attrs):
         # Retrieve the refresh token from cookies
         refresh_token = self.context['request'].COOKIES.get('refresh')
+        print("refresh token " , refresh_token)
 
         
         if not refresh_token:
@@ -72,3 +74,41 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
 
         # Call the parent class's validate method to continue validation
         return super().validate(attrs)
+    
+
+
+# ========== User Serializer ====== #
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields =  ['username' , 'email', 'phone']
+
+
+# =========== User Profile   ========== # 
+class UserProfileSerializer(serializers.ModelSerializer):
+    user =  UserSerializer()
+    class  Meta:
+        model =  UserProfile
+        fields = "__all__"
+
+
+    def update(self,instance,validated_data):
+        print("profile update",validated_data)
+        print("Data called")
+        user_data =  validated_data.pop("user",None)
+
+        if user_data:
+            user  =  instance.user
+            for attr , value in user_data.items():
+                setattr(user , attr , value)
+            user.save()
+        
+        for attr , value in validated_data.items():
+            setattr(instance ,  attr , value)
+        instance.save()
+
+        return instance
+
+
+
+

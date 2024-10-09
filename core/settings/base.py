@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Common constants
 SECRET_KEY = config('SECRET_KEY', default='your_default_secret_key')
@@ -22,10 +22,27 @@ DATABASES = {
         'NAME': config("POSTGRES_DB"),
         'USER': config("POSTGRES_USER"),
         'PASSWORD': config("POSTGRES_PASSWORD"),
-        'HOST': "localhost",
+        'HOST': "127.0.0.1",
         'PORT': 5432,
     }
 }
+
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR,"templates")],  # Correct for Path
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 # JWT settings
 SIMPLE_JWT = {
@@ -75,23 +92,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,"mail_templates")],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-print(f"Template directories: {TEMPLATES[0]['DIRS']}")
-
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # Password validation
@@ -129,5 +129,10 @@ AUTH_USER_MODEL = "account.user"
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'constant.CookieAuthentication.CustomJWTAuthentication',
-    )
+    ),
+     'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',   
+        'rest_framework.parsers.FormParser',    
+        'rest_framework.parsers.MultiPartParser',  
+    ],
 }
