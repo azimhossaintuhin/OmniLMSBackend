@@ -46,7 +46,7 @@ TEMPLATES = [
 
 # JWT settings
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=17),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -73,10 +73,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # installed apps 
     "apps.account",
+    "apps.course",
+    # Third party apps 
     "corsheaders",
     'rest_framework',
     'rest_framework_simplejwt',
+    "ckeditor"
 ]
 
 MIDDLEWARE = [
@@ -119,7 +123,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "static"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / 'media'
-
+CKEDITOR_UPLOAD_PATH = "uploads/"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom Authentication model

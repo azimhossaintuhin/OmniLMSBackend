@@ -68,7 +68,8 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
             print("from body" , refresh_token)
             if not refresh_token:
                 raise ValidationError("Refresh token is required either in cookies or request body.")
-      
+            
+        print("refresh" , attrs.get("refresh"))
         # Set the refresh token in the attributes to make it available
         attrs['refresh'] = refresh_token
 
@@ -93,8 +94,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
     def update(self,instance,validated_data):
-        print("profile update",validated_data)
-        print("Data called")
         user_data =  validated_data.pop("user",None)
 
         if user_data:

@@ -47,9 +47,23 @@ def api_schema(request, *args, **kwargs) -> Response:
                         "url": f"{main_route}/is_authenticated/",
                         "method": "GET",
                         "description": "Check if the user is authenticated."
+                    },
+                    "user-profile":{
+                        "url": f"{main_route}/user-profile/",
+                        "method": "GET",
+                        "description": "Get User  Profile  Info."
+                    },
+                      "user-profile update":{
+                        "url": f"{main_route}/user-profile/",
+                        "method": "PATCH",
+                        "description": "Partial Update  User Profile"
                     }
                 }
         
+        },
+
+        "course_url":{
+
         }
     }
 

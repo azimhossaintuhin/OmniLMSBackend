@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.parsers import MultiPartParser , FormParser , JSONParser
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView 
+from rest_framework_simplejwt.exceptions import InvalidToken ,TokenError
 
 # ========= Importing utilities ========== #
 from constant.Response import SuccessResponse, ErrorResponse
@@ -20,7 +21,7 @@ from .serializers import RegisterSerializer, CustomTokenObtainPairSerializer , U
 
 from django.core.cache import cache
 from django.utils import timezone
-from datetime import timedelta
+
 
 # ===== Rigiter Api View ======= #
 class RegisterApiView(APIView):
@@ -131,7 +132,8 @@ class CustomTokenRefreshView(TokenRefreshView):
     def get_serializer_context(self):
         """ Pass the request context to the serializer. """
         context = super().get_serializer_context()
-        context['request'] = self.request  # Add the request to the context
+        context['request'] = self.request
+        print("request data" ,self.request.data)  # Add the request to the context
         return context
 
 # ======= Logout Api View ========= #
@@ -261,6 +263,27 @@ class mobileLoginApiView(TokenObtainPairView):
         return SuccessResponse("token",context)
 
 
+#======= Mobile Refresh Token ======= #
+class MobileRefreshToken(TokenRefreshView):
+
+    def post(self, request, *args, **kwargs):
+        print("Refreshing token for mobile client")
+        refresh_token = request.data.get('refresh', None)
+        
+        if not refresh_token:
+            return ErrorResponse("Refresh token is required.")
+
+        try:
+            
+            response = super().post(request, *args, **kwargs)
+            response.data['message'] = 'Token refreshed successfully'
+            response.data['device_info'] = "Mobile"  # Example of mobile-specific info
+            return response
+        
+        except (InvalidToken, TokenError) as e:
+            # Handle token errors in a custom way
+            return ErrorResponse("Invalid refresh token.")
+
 # ====== Authentication Check View =========== #
 class AuthenticatedApiView(APIView):
     permission_classes=[IsAuthenticated]
@@ -287,6 +310,8 @@ class  UserProfileApiView(APIView):
         except query.DoesNotExist:
             return ErrorResponse("User Dosen't  Exsits")
 
+
+    # ====== patch method ===== #
     def patch(self, request, *args, **kwargs):
         print(request.data)  # Use request.data instead of request.body for parsed data
         user = request.user

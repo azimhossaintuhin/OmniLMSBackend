@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("" , api_schema , name="schema" ),
     path("api/v1/", include("api.v1.urls")),  # Include API URLs
+    path('ckeditor/', include('ckeditor_uploader.urls')),
 ]
 
 # Serve media files during development
