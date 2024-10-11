@@ -49,4 +49,25 @@ class CourseListApiView(ListAPIView):
                   print(e)
                   return ErrorResponse("An error occurred while retrieving categories.")
 
-                  
+
+
+
+
+class CourseDetailsApiView(RetrieveAPIView):
+    serializer_class = CourseSerializer
+    queryset = Course.objects.all()
+    lookup_field = 'slug'
+    permission_classes = []
+    authentication_classes = []
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            course = self.get_object()
+            serializer = self.get_serializer(course)
+            return SuccessResponse("course detail", serializer.data)
+        
+        except Course.DoesNotExist:
+            return ErrorResponse("Course not found.")
+        except Exception as e:
+            print(f"Error retrieving course details: {str(e)}")
+            return ErrorResponse("An error occurred while retrieving course details.")
