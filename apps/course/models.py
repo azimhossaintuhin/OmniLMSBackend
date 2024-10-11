@@ -2,6 +2,7 @@ from django.db import models
 from uuid import uuid4
 from ckeditor.fields import RichTextField
 from django.utils.text import slugify
+from apps.account.models import User
 
 
 
@@ -82,8 +83,18 @@ class Videos(models.Model):
 
 
 
-# =========== 
-class enrollment(models.Model):
-    pass
+# =========== Enrollment ========== #
+class Enrollment(models.Model):
+    course =  models.ForeignKey(Course, on_delete=models.CASCADE , related_name="enroll_course")
+    user = models.ForeignKey(User , on_delete=models.CASCADE , related_name="enroll_user")
+    enrolled_at =  models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.course.title
+    
+
+
+
+
 
 
