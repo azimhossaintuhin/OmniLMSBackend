@@ -10,8 +10,6 @@ class InstructorSerializer(ModelSerializer):
         fileds = "__all__"
 
 
-
-
 # ======  Category Serializer ======= #
 class CategorySerializer(ModelSerializer):
     class Meta:
@@ -28,6 +26,7 @@ class CourseSerializer(ModelSerializer):
         fields =  "__all__"
 
 
+#  ========== Lession Serializer ======== #
 
 class LessionSerializer(ModelSerializer):
     class Meta:
@@ -40,23 +39,25 @@ class LessionSerializer(ModelSerializer):
         print(self.context)
         user = self.context.get('user')
         is_enrolled = self.context.get('is_enrolled', False)
-
-        if not instance.is_free and not is_enrolled:
+        if not instance.is_free and  not is_enrolled:
             representation.pop('video_link', None)
             representation.pop('video', None)
-        
+        representation.pop("module")
         return representation
 
+
+# ======= Module Serializer ======= #
 class ModuleSerializer(ModelSerializer):
     class Meta:
-        model =  Module
-        fields =  "__all__"
+        model = Module
+        fields = "__all__"
 
     def to_representation(self, instance):
+        print(self.context)
         representation = super().to_representation(instance)
-        lession =  Lession.objects.filter(module = instance)
-        lession_serializer = LessionSerializer(lession , many=True , context = self.context)
-        representation["lession"] =  lession_serializer
+        lession = Lession.objects.filter(module=instance)
+        lession_serializer = LessionSerializer(lession, many=True, context=self.context)
+        representation["lession"] = lession_serializer.data  # serialize the data, not the object
 
         return representation
 

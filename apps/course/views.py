@@ -8,7 +8,7 @@ from .serializers import (
      CategorySerializer , 
      CourseSerializer , 
      ReviewSerializer,
-     ModelSerializer
+     ModuleSerializer
 )
 
 
@@ -81,28 +81,31 @@ class CourseRetriveApiView(RetrieveAPIView):
 
 #  ============ Module api view =========== #
 class ModuleApiView(APIView):
-     permission_classes = [ AllowAny]
-     def get(self,request , *args, **kwargs):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
         try:
-             course_slug =  kwargs.get("course_slug")
-             user = request.user
-             context = {}
-             if user.is_authenticated:
-                  context["user"] =  user
-                  is_enrolled =  Enrollment.objects.get(user=user)
-                  if  not is_enrolled.DoesNotExist:
-                       context["is_enrolled"] = True
-                  else:
-                       context["is_enrolled"] = False
-             modules = Module.objects.get(course__slug = course_slug)
-             if modules:
-                  serializer =  ModelSerializer(modules , many=True , context= context)
-                  SuccessResponse("modules" , serializer.data )
-            
-             return ErrorResponse("No Module Exsits")
-        
+            course_slug = kwargs.get("course_slug")
+            user = request.user
+            context = {}
+
+            if user.is_authenticated:
+                context["user"] = user
+                try:
+                    is_enrolled = Enrollment.objects.get(user=user, course__slug=course_slug)
+                    context["is_enrolled"] = True
+                except Enrollment.DoesNotExist:
+                    context["is_enrolled"] = False
+
+            modules = Module.objects.filter(course__slug=course_slug)
+            if modules.exists():
+                serializer = ModuleSerializer(modules, many=True, context=context)
+                return SuccessResponse("modules", serializer.data)
+
+            return ErrorResponse("No Modules Exist")
+
         except Module.DoesNotExist as e:
-            print("module exceptions" , str(e))
+            print("Module exception:", str(e))
             return ErrorResponse(str(e))
         
              
