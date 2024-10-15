@@ -29,6 +29,38 @@ class CourseSerializer(ModelSerializer):
 
 
 
+class LessionSerializer(ModelSerializer):
+    class Meta:
+        model = Lession
+        fields =  "__all__"
+
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        print(self.context)
+        user = self.context.get('user')
+        is_enrolled = self.context.get('is_enrolled', False)
+
+        if not instance.is_free and not is_enrolled:
+            representation.pop('video_link', None)
+            representation.pop('video', None)
+        
+        return representation
+
+class ModuleSerializer(ModelSerializer):
+    class Meta:
+        model =  Module
+        fields =  "__all__"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        lession =  Lession.objects.filter(module = instance)
+        lession_serializer = LessionSerializer(lession , many=True , context = self.context)
+        representation["lession"] =  lession_serializer
+
+        return representation
+
+
 # ========= Review Serializer =========== #
 class ReviewSerializer(ModelSerializer):
     user_profile = UserProfileSerializer()

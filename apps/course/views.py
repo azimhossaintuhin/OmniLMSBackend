@@ -1,11 +1,15 @@
 from django.shortcuts import render
 from . models import  *
-from .serializers import CategorySerializer , CourseSerializer , ReviewSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated ,AllowAny
 from constant.Response import SuccessResponse , ErrorResponse
 from rest_framework.generics import ListAPIView,RetrieveAPIView
 from rest_framework.views import APIView
-
+from .serializers import (
+     CategorySerializer , 
+     CourseSerializer , 
+     ReviewSerializer,
+     ModelSerializer
+)
 
 
 
@@ -13,8 +17,8 @@ from rest_framework.views import APIView
 class CategoryListApiView(ListAPIView):
     serializer_class =  CategorySerializer
     queryset =  Category.objects.all()
-    permission_classes=[]
-    authentication_classes=[]
+    permission_classes=[AllowAny]
+ 
 
     def list(self, request, *args, **kwargs):
                 try:
@@ -35,8 +39,8 @@ class CategoryListApiView(ListAPIView):
 class CourseListApiView(ListAPIView):
       serializer_class = CourseSerializer
       queryset =  Course.objects.all()
-      permission_classes = []
-      authentication_classes=[]
+      permission_classes = [AllowAny]
+     
 
     # ====== Overriding the  list ======== #
       def list(self,request ,*args, **kwargs):
@@ -59,8 +63,8 @@ class CourseRetriveApiView(RetrieveAPIView):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
     lookup_field = 'slug'
-    permission_classes = []
-    authentication_classes = []
+    permission_classes = [AllowAny]
+    
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -74,26 +78,56 @@ class CourseRetriveApiView(RetrieveAPIView):
             print(f"Error retrieving course details: {str(e)}")
             return ErrorResponse("An error occurred while retrieving course details.")
 
-# ======== Course Review List Api View ============ #
-class ReviewListApiView(ListAPIView):
-    permission_classes = []
-    authentication_classes = []
-    serializer_class = ReviewSerializer
+
+#  ============ Module api view =========== #
+class ModuleApiView(APIView):
+     permission_classes = [ AllowAny]
+     def get(self,request , *args, **kwargs):
+        try:
+             course_slug =  kwargs.get("course_slug")
+             user = request.user
+             context = {}
+             if user.is_authenticated:
+                  context["user"] =  user
+                  is_enrolled =  Enrollment.objects.get(user=user)
+                  if  not is_enrolled.DoesNotExist:
+                       context["is_enrolled"] = True
+                  else:
+                       context["is_enrolled"] = False
+             modules = Module.objects.get(course__slug = course_slug)
+             if modules:
+                  serializer =  ModelSerializer(modules , many=True , context= context)
+                  SuccessResponse("modules" , serializer.data )
+            
+             return ErrorResponse("No Module Exsits")
+        
+        except Module.DoesNotExist as e:
+            print("module exceptions" , str(e))
+            return ErrorResponse(str(e))
+        
+             
+
+                    
+                    
+               
+
+
+
+# ======== Course Review  Api View ============ #
+class ReviewApiView(APIView):
+    permission_classes = [AllowAny]
+   
 
     def get(self,*args, **kwargs):
          try:
             course_slug =  kwargs.get("course_slug")
             review =  Review.objects.filter(course__slug =  course_slug)
             if review.exists():
-                 return SuccessResponse("reviews" , review)
+                 serializer =  ReviewSerializer(review ,many=True)
+                 return SuccessResponse("reviews" , serializer.data)
             else :
                  return ErrorResponse("NO Reviews Exisits")
          except Exception as e :
             print("Review Exception" , str(e))
             return ErrorResponse(str(e))
-         
-
-    
-    
-         
          
