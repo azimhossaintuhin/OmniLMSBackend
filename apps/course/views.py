@@ -4,6 +4,7 @@ from .serializers import CategorySerializer , CourseSerializer , ReviewSerialize
 from rest_framework.permissions import IsAuthenticated
 from constant.Response import SuccessResponse , ErrorResponse
 from rest_framework.generics import ListAPIView,RetrieveAPIView
+from rest_framework.views import APIView
 
 
 
@@ -41,6 +42,7 @@ class CourseListApiView(ListAPIView):
       def list(self,request ,*args, **kwargs):
             try:
                 qeuryset = self.get_queryset()
+                print("queryset" , qeuryset)
                 if not qeuryset.exists():
                       return ErrorResponse("No course found.")
                 serializer =  self.get_serializer(qeuryset , many=True)
@@ -72,38 +74,26 @@ class CourseRetriveApiView(RetrieveAPIView):
             print(f"Error retrieving course details: {str(e)}")
             return ErrorResponse("An error occurred while retrieving course details.")
 
-
-# Course Details 
-
-
-
-
-
-
-
 # ======== Course Review List Api View ============ #
 class ReviewListApiView(ListAPIView):
     permission_classes = []
     authentication_classes = []
     serializer_class = ReviewSerializer
 
-    def get_queryset(self):
-        try:
-            course_slug= self.kwargs.get("course_slug")
-        
-            return Review.objects.filter(course__slug=course_slug)
-        except Exception as e:
-             print("error" ,  str(e))
-             return str(e)
-    def list(self, request, *args, **kwargs):
-        try:
-            queryset = self.get_queryset()
-            if not queryset.exists():
-                return ErrorResponse("No reviews found.")
-            
-            serializer = self.get_serializer(queryset, many=True)
-            return SuccessResponse("review", serializer.data)
-        
-        except Exception as e:
-            print(f"Error retrieving reviews: {str(e)}")
-            return ErrorResponse("An error occurred while retrieving reviews.")
+    def get(self,*args, **kwargs):
+         try:
+            course_slug =  kwargs.get("course_slug")
+            review =  Review.objects.filter(course__slug =  course_slug)
+            if review.exists():
+                 return SuccessResponse("reviews" , review)
+            else :
+                 return ErrorResponse("NO Reviews Exisits")
+         except Exception as e :
+            print("Review Exception" , str(e))
+            return ErrorResponse(str(e))
+         
+
+    
+    
+         
+         
