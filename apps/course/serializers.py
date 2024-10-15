@@ -53,12 +53,10 @@ class ModuleSerializer(ModelSerializer):
         fields = "__all__"
 
     def to_representation(self, instance):
-        print(self.context)
         representation = super().to_representation(instance)
         lession = Lession.objects.filter(module=instance)
         lession_serializer = LessionSerializer(lession, many=True, context=self.context)
-        representation["lession"] = lession_serializer.data  # serialize the data, not the object
-
+        representation["lession"] = lession_serializer.data 
         return representation
 
 
