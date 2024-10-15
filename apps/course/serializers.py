@@ -1,18 +1,43 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Course , Category
+from apps.account.serializers import UserProfileSerializer
+from .models import *
+
+
+# ========== Instructocr serializer ============ #
+class InstructorSerializer(ModelSerializer):    
+    class Meta:
+        model =  Instructor
+        fileds = "__all__"
+
+
 
 
 # ======  Category Serializer ======= #
-class CategorySeiralizer(ModelSerializer):
+class CategorySerializer(ModelSerializer):
     class Meta:
         model =  Category
         fields = "__all__"
 
+
+# ======= Course Serializer ======== #
 class CourseSerializer(ModelSerializer):
-    category  =  CategorySeiralizer()
+    category  =  CategorySerializer()
+    instructor =  InstructorSerializer(many=True)
     class Meta:
         model = Course
         fields =  "__all__"
+
+
+
+# ========= Review Serializer =========== #
+class ReviewSerializer(ModelSerializer):
+    user_profile = UserProfileSerializer()
+
+    class Meta:
+        model =  Review
+        fields =  "__all__"
+
+
 
     
     

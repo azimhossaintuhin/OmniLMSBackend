@@ -8,7 +8,18 @@ DEBUG = True  # Set to True for development
 ALLOWED_HOSTS = ["*"]
 
 
-
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Cookie',
+]
 
 
 # Add any other development-specific settings here

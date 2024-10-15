@@ -56,7 +56,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             httponly=True,  
             secure=True, 
             max_age=1*24*60*60, # Set to True in production (HTTPS only)
-            samesite='Lax' , # CSRF protection
+            samesite='Strict' , # CSRF protection
          
         )
         response.set_cookie(
@@ -65,7 +65,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             httponly=True, 
             secure=True,
             max_age=1*24*60*60,
-            samesite='Lax' , # CSRF protection
+            samesite='Strict' , # CSRF protection
 
            
         )
@@ -86,8 +86,7 @@ class CustomTokenRefreshView(TokenRefreshView):
             return ErrorResponse("Refresh token not found")
 
         # Prepare the data for token refresh
-        data = {'refresh': refresh_token}
-        print(data)
+
         # Call the parent class's post method to refresh the tokens
         response = super().post(request, *args, **kwargs)
         print( "Custom resposne ",response)
@@ -103,7 +102,7 @@ class CustomTokenRefreshView(TokenRefreshView):
                 value=access_token,
                 httponly=True,  # Makes the cookie inaccessible to JavaScript
                 secure=False,   # Set to True if your site is HTTPS
-                samesite='Lax', # CSRF protection
+                samesite='None', # CSRF protection
                 max_age=1*24*60*60  # Token expires in 1 day
             )
             
@@ -113,7 +112,7 @@ class CustomTokenRefreshView(TokenRefreshView):
                 value=new_refresh_token,
                 httponly=True,
                 secure=False,   # Set to True for HTTPS
-                samesite='Lax',
+                samesite='Strict',
                 max_age=1*24*60*60  # Refresh token expires in 1 day
             )
         else:
@@ -133,7 +132,7 @@ class CustomTokenRefreshView(TokenRefreshView):
         """ Pass the request context to the serializer. """
         context = super().get_serializer_context()
         context['request'] = self.request
-        print("request data" ,self.request.data)  # Add the request to the context
+     # Add the request to the context
         return context
 
 # ======= Logout Api View ========= #
@@ -141,8 +140,8 @@ class LogoutApiView(APIView):
     permission_classes=[IsAuthenticated]
     def post(self , request , *args, **kwargs):
         response =  SuccessResponse("message" , "Logout Successfull")
-        response.delete_cookie('access' ,  path='/', samesite='Lax')
-        response.delete_cookie("refresh" ,  path='/' ,  samesite='Lax')
+        response.delete_cookie('access' ,  path='/', samesite='Strict')
+        response.delete_cookie("refresh" ,  path='/' ,  samesite='Strict')
         return response
 
 
@@ -287,8 +286,10 @@ class MobileRefreshToken(TokenRefreshView):
 # ====== Authentication Check View =========== #
 class AuthenticatedApiView(APIView):
     permission_classes=[IsAuthenticated]
+    
 
     def get(self,request,*args, **kwargs):
+        print("access" , request.COOKIES.get("access"))
         user =  request.user.username
         return SuccessResponse("user",user )
 
@@ -297,9 +298,9 @@ class AuthenticatedApiView(APIView):
 class  UserProfileApiView(APIView):
     permission_classes= [IsAuthenticated]
 
-
     # ========== Get Request =========== # 
     def get(self,request,*args, **kwargs):
+        print("user",request.COOKIES.get('access'))
         user =  request.user
         
         query =  UserProfile.objects.get(user=user)
@@ -313,7 +314,6 @@ class  UserProfileApiView(APIView):
 
     # ====== patch method ===== #
     def patch(self, request, *args, **kwargs):
-        print(request.data)  # Use request.data instead of request.body for parsed data
         user = request.user
         
         try:

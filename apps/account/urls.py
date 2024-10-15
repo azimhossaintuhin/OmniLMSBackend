@@ -9,7 +9,7 @@ urlpatterns:list= [
      path("forgot-password/" ,ForgotPasswordApiView.as_view() , name="forgot password"),
      path("reset-password/<str:uid>/<str:token>/", ResetPasswordApiView.as_view() , name="reset password" ),
     #  for mobile authentication
-     path("mobile/token" , mobileLoginApiView.as_view() , name="mobile_login"),
+     path("mobile/token/" , mobileLoginApiView.as_view() , name="mobile_login"),
      path("mobile/refresh/token/" , MobileRefreshToken.as_view() , name="mobile_refresh"),
      path("is_authenticated/" ,AuthenticatedApiView.as_view() , name="is_authenticated"),
     # User Profile Related 

@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 
 @api_view(["GET"])
 def api_schema(request, *args, **kwargs) -> Response:
+
     main_route = "/api/v1"
     schema = {
         "account_urls": {

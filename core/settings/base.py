@@ -46,14 +46,14 @@ TEMPLATES = [
 
 # JWT settings
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=17),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    
 }
 
 # CORS settings
@@ -139,4 +139,11 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.FormParser',    
         'rest_framework.parsers.MultiPartParser',  
     ],
+}
+
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',
+    },
 }

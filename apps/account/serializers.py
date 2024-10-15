@@ -60,7 +60,6 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         # Retrieve the refresh token from cookies
         refresh_token = self.context['request'].COOKIES.get('refresh')
-        print("refresh token " , refresh_token)
 
         
         if not refresh_token:
@@ -69,11 +68,11 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
             if not refresh_token:
                 raise ValidationError("Refresh token is required either in cookies or request body.")
             
-        print("refresh" , attrs.get("refresh"))
-        # Set the refresh token in the attributes to make it available
+        print("attr" , attrs.get("refresh"))
+ 
         attrs['refresh'] = refresh_token
 
-        # Call the parent class's validate method to continue validation
+
         return super().validate(attrs)
     
 
