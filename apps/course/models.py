@@ -138,8 +138,6 @@ class Review(models.Model):
     
 
 
-
-
 # ==============  Insttructor List  ========= # 
 class  Instructor(models.Model):
     image =  models.ImageField(upload_to="isntructor")
@@ -149,6 +147,7 @@ class  Instructor(models.Model):
     def __str__(self):
         return self.name
     
+
 
 
     

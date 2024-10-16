@@ -34,7 +34,6 @@ class CategoryListApiView(ListAPIView):
                     return ErrorResponse("An error occurred while retrieving categories.")
 
 
-
 # ============ Course List Api View ========== #
 class CourseListApiView(ListAPIView):
       serializer_class = CourseSerializer
@@ -54,9 +53,6 @@ class CourseListApiView(ListAPIView):
             except Exception as e:
                   print(e)
                   return ErrorResponse("An error occurred while retrieving categories.")
-
-
-
 
 # ========== Course  Retrive Api View ============= #
 class CourseRetriveApiView(RetrieveAPIView):
@@ -108,11 +104,8 @@ class ModuleApiView(APIView):
             print("Module exception:", str(e))
             return ErrorResponse(str(e))
         
-             
 
-                    
-                    
-               
+
 
 
 

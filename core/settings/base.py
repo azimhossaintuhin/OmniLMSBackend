@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     # installed apps 
     "apps.account",
     "apps.course",
+    "apps.payments",
     # Third party apps 
     "corsheaders",
     'rest_framework',
