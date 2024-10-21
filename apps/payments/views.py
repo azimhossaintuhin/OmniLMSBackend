@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import (
     CouponSerializer
 )
-from .gateways.sslcommzer import SslCommerzPayment
+from .gateways.sslcommerz.sslcommzer import SslCommerzPayment
 
 # ====== Cart Api View ======= #
 class CartApiView(APIView):
@@ -51,14 +51,11 @@ class CartApiView(APIView):
 
             # Get or create a cart for the current user
             cart, created = Cart.objects.get_or_create(user=request.user)
-
             # Associate the course with the cart
             cart.course = course
-
             # If a valid coupon is provided, associate it with the cart
             if cupon_used:
                 cart.cupon = cupon_used
-
             # Save the updated cart
             cart.save()
 
@@ -83,6 +80,7 @@ class CartApiView(APIView):
         except Exception as e:
             return ErrorResponse(str(e))
 
+# ========= Cupon Api View ======= #
 class  CuponApiView(APIView):
     permission_classes=[AllowAny]
 
@@ -126,8 +124,7 @@ class  CuponApiView(APIView):
         except Exception as e:
             return ErrorResponse(str(e))
             
-            
-
+        
 # ========= Payment Api View ========= #
 class  PaymentApiView(APIView):
     permission_classes = [IsAuthenticated]
@@ -155,14 +152,3 @@ class  PaymentApiView(APIView):
         except Exception as e:
             return ErrorResponse(str(e))
 
-
-
-class PaymentSuccessApiView(APIView):
-    permission_classes = [AllowAny]
-
-    def get(self , request , *args, **kwargs):
-        return SuccessResponse("mesage" , {"request_body":request.body , "data":request.data })
-    
-    def post(self , request , *args, **kwargs):
-        return SuccessResponse("mesage" , {"request_body":request.body , "data":request.data })
-    
