@@ -1,9 +1,9 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Coupon
+from .models import Cupon
 
 class CouponSerializer(ModelSerializer):
     class Meta:
-        model = Coupon
+        model = Cupon
         exclude_fields = ["specific_course" , "is_for_all"]
 
 

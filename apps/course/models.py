@@ -118,6 +118,8 @@ class  Assingment(models.Model):
 class Enrollment(models.Model):
     course =  models.ForeignKey(Course, on_delete=models.CASCADE , related_name="enroll_course")
     user = models.ForeignKey(User , on_delete=models.CASCADE , related_name="enroll_user")
+    payment_method =  models.CharField(max_length=255)
+    payment_id =  models.CharField(max_length=25555)
     enrolled_at =  models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
