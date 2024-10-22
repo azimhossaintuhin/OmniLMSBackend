@@ -45,15 +45,19 @@ class CourseListApiView(ListAPIView):
       def list(self,request ,*args, **kwargs):
             try:
                 qeuryset = self.get_queryset()
-                print("queryset" , qeuryset)
                 if not qeuryset.exists():
                       return ErrorResponse("No course found.")
-                serializer =  self.get_serializer(qeuryset , many=True)
+                context =  {
+                    "request":request    
+                }
+                serializer =  self.get_serializer(qeuryset , many=True, context=context)
                 return SuccessResponse("course" ,  serializer.data)
             except Exception as e:
                   print(e)
-                  return ErrorResponse("An error occurred while retrieving categories.")
+                  return ErrorResponse(str(e))
 
+      
+    
 # ========== Course  Retrive Api View ============= #
 class CourseRetriveApiView(RetrieveAPIView):
     serializer_class = CourseSerializer
@@ -64,15 +68,17 @@ class CourseRetriveApiView(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         try:
+            context =  {
+                 "request": request
+            }
             course = self.get_object()
-            serializer = self.get_serializer(course)
-            return SuccessResponse("course_details", serializer.data)
+            serializer = self.get_serializer(course , context =context)
+            return SuccessResponse("course_details", serializer.data ,)
         
         except Course.DoesNotExist:
             return ErrorResponse("Course not found.")
         except Exception as e:
-            print(f"Error retrieving course details: {str(e)}")
-            return ErrorResponse("An error occurred while retrieving course details.")
+            return ErrorResponse(str(e))
 
 
 #  ============ Module api view =========== #
@@ -104,11 +110,6 @@ class ModuleApiView(APIView):
             print("Module exception:", str(e))
             return ErrorResponse(str(e))
         
-
-
-
-
-
 # ======== Course Review  Api View ============ #
 class ReviewApiView(APIView):
     permission_classes = [AllowAny]
@@ -127,3 +128,5 @@ class ReviewApiView(APIView):
             print("Review Exception" , str(e))
             return ErrorResponse(str(e))
          
+
+

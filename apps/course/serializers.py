@@ -19,11 +19,28 @@ class CategorySerializer(ModelSerializer):
 
 # ======= Course Serializer ======== #
 class CourseSerializer(ModelSerializer):
-    category  =  CategorySerializer()
-    instructor =  InstructorSerializer(many=True)
+    category = CategorySerializer()
+    instructor = InstructorSerializer(many=True)
+    
     class Meta:
         model = Course
-        fields =  "__all__"
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get("request")
+        representation["is_enrolled"] = False
+        
+        if request and request.user.is_authenticated:
+            user = request.user
+            course = instance
+            enrollment =  Enrollment.objects.filter(user=user, course=course)
+            if enrollment.exists():
+                representation["is_enrolled"] = True
+        
+        return representation
+
+
 
 
 #  ========== Lession Serializer ======== #

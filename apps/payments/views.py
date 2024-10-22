@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from django.utils import timezone
 from .models import *
-from apps.course.serializers import CourseSerializer
+from apps.course.models import Enrollment
 from rest_framework.permissions import IsAuthenticated
 from .serializers import (
     CouponSerializer
@@ -18,47 +18,47 @@ class CartApiView(APIView):
     def get(self ,request ,*args, **kwargs):
         try:
             cart = Cart.objects.get(user =request.user)
-           
+            enrollment =  Enrollment.objects.filter(user = request.user , course = cart.course)
             context = {
                      "course_title": cart.course.title ,
                         "course_image": request.build_absolute_uri(cart.course.image.url) ,
                         "course_price": cart.course.new_price,
-                        "cupon" : cart.cupon.cupon,
-                        "discount_ammount": cart.get_disscout_ammount(),
-                        "total_price":cart.total_ammount()
+                        "cupon" :cart.cupon.cupon if cart.cupon else "No Cupon" ,
+                        "discount_ammount": cart.get_disscout_ammount() if cart.cupon else "0",
+                        "total_price":cart.total_ammount(),
+                         "is_enrolled": True if enrollment.exists() else False
                 }
             return SuccessResponse("cart" , context)
     
         except Cart.DoesNotExist:
             return ErrorResponse("Please Select A Course")
+        except Exception as e:
+            return ErrorResponse(str(e))
 
     def post(self, request, *args, **kwargs):
         course_slug = request.data.get("slug")
         cupon_code = request.data.get("cupon", "")
 
         try:
-            # Validate that course_slug is provided
             if not course_slug:
                 return ErrorResponse("Please select a course")
 
-            # Fetch the course using the provided slug
             course = Course.objects.get(slug=course_slug)
 
-            # Try to fetch the coupon if one is provided
             cupon_used = None
             if cupon_code != "":
                 cupon_used = Cupon.objects.get(cupon=cupon_code)
-
-            # Get or create a cart for the current user
+    
             cart, created = Cart.objects.get_or_create(user=request.user)
-            # Associate the course with the cart
             cart.course = course
-            # If a valid coupon is provided, associate it with the cart
+            
             if cupon_used:
+                cart.cupon = cupon_used
+            else:
                 cart.cupon = cupon_used
             # Save the updated cart
             cart.save()
-
+            enrollment =  Enrollment.objects.filter(user = request.user , course = course)
             # Prepare the response context
             context = {
                 "course_title": course.title,
@@ -67,6 +67,7 @@ class CartApiView(APIView):
                 "cupon": cart.cupon.cupon if cart.cupon else "",
                 "discount_amount": cart.get_disscout_ammount() if cart.cupon else "",
                 "total_price": cart.total_ammount(),
+                "is_enrolled": True if enrollment.exists() else False
             }
 
             # Return success response with cart details
