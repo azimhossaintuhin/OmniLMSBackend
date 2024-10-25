@@ -56,7 +56,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             httponly=True,  
             secure=True, 
             max_age=1*24*60*60, # Set to True in production (HTTPS only)
-            samesite='Strict' , # CSRF protection
+            samesite='Lax' , # CSRF protection
          
         )
         response.set_cookie(
@@ -65,7 +65,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             httponly=True, 
             secure=True,
             max_age=1*24*60*60,
-            samesite='Strict' , # CSRF protection
+            samesite='Lax' , # CSRF protection
 
            
         )
@@ -102,7 +102,7 @@ class CustomTokenRefreshView(TokenRefreshView):
                 value=access_token,
                 httponly=True,  # Makes the cookie inaccessible to JavaScript
                 secure=False,   # Set to True if your site is HTTPS
-                samesite='None', # CSRF protection
+                samesite='Lax', # CSRF protection
                 max_age=1*24*60*60  # Token expires in 1 day
             )
             
@@ -112,7 +112,7 @@ class CustomTokenRefreshView(TokenRefreshView):
                 value=new_refresh_token,
                 httponly=True,
                 secure=False,   # Set to True for HTTPS
-                samesite='Strict',
+                samesite='Lax',
                 max_age=1*24*60*60  # Refresh token expires in 1 day
             )
         else:

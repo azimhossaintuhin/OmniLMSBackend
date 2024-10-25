@@ -82,6 +82,14 @@ class Lession(models.Model):
         return self.title
 
 
+# ============ Video is Watched ======== #
+class  CompleteLession(models.Model):
+    user =  models.ForeignKey(User , on_delete=models.CASCADE)
+    lession = models.ForeignKey(Lession , on_delete=models.CASCADE)
+    created_at =  models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.lession.title
+
 # ============ Projects ========= # 
 class Projects(models.Model):
     course =  models.ForeignKey(Course ,  related_name="course_projects" , on_delete=models.CASCADE)
@@ -138,6 +146,9 @@ class Review(models.Model):
     def __str__(self):
         return self.review
     
+
+
+
 
 
 # ==============  Insttructor List  ========= # 

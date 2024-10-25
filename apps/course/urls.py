@@ -4,7 +4,8 @@ from .views import (
     CourseListApiView,
     CourseRetriveApiView,
     ReviewApiView,
-    ModuleApiView
+    ModuleApiView,
+    CompletedApiView
 )
 
 urlpatterns = [
@@ -12,5 +13,6 @@ urlpatterns = [
     path("course/", CourseListApiView.as_view(), name="courseList"),
     path("course/<str:slug>/", CourseRetriveApiView.as_view(), name="courseRetrieve"),
     path("course/<str:course_slug>/review/", ReviewApiView.as_view(), name="courseReviews"),
-    path("course/<str:course_slug>/module/", ModuleApiView.as_view() , name="course_module")
+    path("course/<str:course_slug>/module/", ModuleApiView.as_view() , name="course_module"),
+    path("course/lession/complete/" ,CompletedApiView.as_view() , name = "completed_video" )
 ]

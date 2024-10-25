@@ -33,6 +33,7 @@ class CourseSerializer(ModelSerializer):
         
         if request and request.user.is_authenticated:
             user = request.user
+            print(request.user)
             course = instance
             enrollment =  Enrollment.objects.filter(user=user, course=course)
             if enrollment.exists():
@@ -49,16 +50,21 @@ class LessionSerializer(ModelSerializer):
     class Meta:
         model = Lession
         fields =  "__all__"
-
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         print(self.context)
         user = self.context.get('user')
         is_enrolled = self.context.get('is_enrolled', False)
+
         if not instance.is_free and  not is_enrolled:
             representation.pop('video_link', None)
             representation.pop('video', None)
+            
+        representation["completed"] = False
+        completed_lession =  CompleteLession.objects.filter(lession = instance , user=user)
+        if  completed_lession.exists():
+            representation["completed"] = True
+        
         representation.pop("module")
         return representation
 

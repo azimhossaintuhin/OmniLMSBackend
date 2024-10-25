@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import  get_object_or_404
 from . models import  *
 from rest_framework.permissions import IsAuthenticated ,AllowAny
 from constant.Response import SuccessResponse , ErrorResponse
@@ -18,6 +18,7 @@ class CategoryListApiView(ListAPIView):
     serializer_class =  CategorySerializer
     queryset =  Category.objects.all()
     permission_classes=[AllowAny]
+    authentication_classes = []
  
 
     def list(self, request, *args, **kwargs):
@@ -39,7 +40,7 @@ class CourseListApiView(ListAPIView):
       serializer_class = CourseSerializer
       queryset =  Course.objects.all()
       permission_classes = [AllowAny]
-     
+      authentication_classes = []
 
     # ====== Overriding the  list ======== #
       def list(self,request ,*args, **kwargs):
@@ -71,6 +72,7 @@ class CourseRetriveApiView(RetrieveAPIView):
             context =  {
                  "request": request
             }
+            print(request.user)
             course = self.get_object()
             serializer = self.get_serializer(course , context =context)
             return SuccessResponse("course_details", serializer.data ,)
@@ -84,7 +86,6 @@ class CourseRetriveApiView(RetrieveAPIView):
 #  ============ Module api view =========== #
 class ModuleApiView(APIView):
     permission_classes = [AllowAny]
-
     def get(self, request, *args, **kwargs):
         try:
             course_slug = kwargs.get("course_slug")
@@ -113,7 +114,7 @@ class ModuleApiView(APIView):
 # ======== Course Review  Api View ============ #
 class ReviewApiView(APIView):
     permission_classes = [AllowAny]
-   
+    authentication_classes = []
 
     def get(self,*args, **kwargs):
          try:
@@ -130,3 +131,24 @@ class ReviewApiView(APIView):
          
 
 
+
+# ========== Completed Video Api View ====== #
+class CompletedApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        lession_id = request.data.get("lession_id")
+        user = request.user
+        lession = get_object_or_404(Lession, pk=lession_id)
+        try:
+            complete_lession, created = CompleteLession.objects.get_or_create(
+                user=user,
+                lession=lession
+            )
+            if created:
+                complete_lession.save()
+                return SuccessResponse("message", f'{lession} is now marked as completed.')
+            else:
+                return SuccessResponse("message", "Lesson already marked as completed.")
+        except Exception as e:
+            return ErrorResponse("An unexpected error occurred: " + str(e))
