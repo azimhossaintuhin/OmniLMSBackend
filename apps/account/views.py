@@ -14,10 +14,12 @@ from django.utils.encoding import force_bytes
 
 # ========  Databse Import ====== #
 from apps.account.models import Token, User, UserProfile
+from apps.course.models import Enrollment
 
 
 # ========= Importing serializers ========== #
 from .serializers import RegisterSerializer, CustomTokenObtainPairSerializer , UserProfileSerializer,CustomTokenRefreshSerializer
+from apps.course.serializers import CourseSerializer
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -331,7 +333,26 @@ class  UserProfileApiView(APIView):
         except UserProfile.DoesNotExist:
             return ErrorResponse("Sorry, User Profile Doesn't Exist")
             
-        
-        
+
+# ==== User Course Enrolled Api View ======= #
+# class EnrolledApiView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, *args, **kwargs):
     
+#         try:
+#             # Get all enrollments for the user
+#             enrollments = Enrollment.objects.filter(user=request.user)
+#             context = {
+#             "request": request
+#         }
+#             if enrollments.exists():
+#                 # Use a list comprehension to get all the courses from the enrollments
+#                 courses = [enrollment.course for enrollment in enrollments]
+#                 serializer = CourseSerializer(courses, many=True , context = context)
+#                 return SuccessResponse("enrolled", serializer.data)
+#             else:
+#                 return SuccessResponse("message", "You Are Not Enrolled To Any Courses")
+#         except Exception as e:
+#             return ErrorResponse(str(e))
 

@@ -29,6 +29,7 @@ class CourseSerializer(ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         request = self.context.get("request")
+        print("request" ,  request.user)
         representation["is_enrolled"] = False
         
         if request and request.user.is_authenticated:
@@ -90,6 +91,7 @@ class ReviewSerializer(ModelSerializer):
     class Meta:
         model =  Review
         fields =  "__all__"
+
 
 
 

@@ -13,7 +13,8 @@ urlpatterns:list= [
      path("mobile/refresh/token/" , MobileRefreshToken.as_view() , name="mobile_refresh"),
      path("is_authenticated/" ,AuthenticatedApiView.as_view() , name="is_authenticated"),
     # User Profile Related 
-    path('user-profile/' , UserProfileApiView.as_view() , name="user_profile" )
+    path('user-profile/' , UserProfileApiView.as_view() , name="user_profile" ),
+   #  path("user/course/enrolled/" , EnrolledApiView.as_view() , name="course_enrolled")
 
     
  ]

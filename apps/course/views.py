@@ -1,5 +1,5 @@
-from django.shortcuts import  get_object_or_404
-from . models import  *
+from django.shortcuts import get_object_or_404 
+from .models import  *
 from rest_framework.permissions import IsAuthenticated ,AllowAny
 from constant.Response import SuccessResponse , ErrorResponse
 from rest_framework.generics import ListAPIView,RetrieveAPIView
@@ -40,10 +40,10 @@ class CourseListApiView(ListAPIView):
       serializer_class = CourseSerializer
       queryset =  Course.objects.all()
       permission_classes = [AllowAny]
-      authentication_classes = []
 
     # ====== Overriding the  list ======== #
       def list(self,request ,*args, **kwargs):
+            print(request.user)
             try:
                 qeuryset = self.get_queryset()
                 if not qeuryset.exists():
@@ -152,3 +152,6 @@ class CompletedApiView(APIView):
                 return SuccessResponse("message", "Lesson already marked as completed.")
         except Exception as e:
             return ErrorResponse("An unexpected error occurred: " + str(e))
+
+
+
